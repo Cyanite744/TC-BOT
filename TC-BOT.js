@@ -136,63 +136,6 @@ client.on('message', message =>{
     var Roast = Math.floor(Math.random()*textArray.length);
     message.reply(`${textArray[Roast]}`)
   }
-//INFO
-//INFO JERRY
-    if(command === "info-jerry") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0x800080)
-  .addField('Jerry',
-    `Hey there im jerry another Admin of Team Cryptic. I play Rainbow six Siege, CS:GO, Tom Clancys Division and Player Unknowns Battle Grounds.`)
-  message.channel.send({embed});
-    }
-//INFO CYANITE
-    if(command === "info-cyanite") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0xFF4400)
-  .addField('Cyanite',
-    `Hey yo what's good Cyanite here, creator of TC bot also ADMIN, Head Rocket League Player and Head GFX Designer of Team Cryptic. If you have any questions about my bot, need a logo or just wanna talk, im almost always there to answer so feel free to DM me whenever :sunglasses::metal: `)
-  message.channel.send({embed});
-    }
-//INFO L00PY
-    if(command === "info-loopy") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0x1e90ff)
-  .addField('L00PY',
-    `Sup guys I'm L00PY Owner and Founder of Team Cryptic I wish you guys a warm welcome, I play cs and tonssss of other games I am also the Team Leader of the CS:GO team. Need to talk to me hit me in the dm's:grin: :ok_hand:.`)
-  message.channel.send({embed});
-    }
-//INFO KYRE
-    if(command === "info-kyre") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0x990000)
-  .addField('Kyre',
-    `Hey guys I'm Kyre, Co Founder of TC Cryptic, I play csgo, the forest and others. My wifi sucks sometimes. Any problems, bugs. I'm here :ok_hand: :yum:`)
-  message.channel.send({embed});
-    }
-//INFO FRANTIC
-    if (command === "info-frantic") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0xFFFFFF)
-  .addField('frantic',
-    `Suh dude :P, i'm frantic AKA Leon and I play play CS, MG 2.`)
-  message.channel.send({embed});
-    }
-//INFO TEARSS
-    if(command === "info-tearss") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0xF0A30A)
-  .addField('tEaRss',
-    `Yo sup guyss im tEaRss one of a few Moderators in Team Cryptic, I play some csgo and some other stuff.You cann hook me up if you want to play csgo`)
-  message.channel.send({embed});
-    }
-//INFO NATURE
-if (command === "info-nature") {
-  const embed = new Discord.RichEmbed()
-  .setColor(0x008A00)
-  .addField('Nature',
-    `Hi i'm Nature I play CS:GO i'm the support in CS:GO Team Cryptic :smiley:`)
-  message.channel.send({embed});
-    }
 //EVAL
 client.on('message', message => {
   if(message.author.id !== "272154298077544449") return;
@@ -522,12 +465,16 @@ const embed = new Discord.RichEmbed()
     message.guild.createRole({
     name: (`${name}`),
     })
-    message.channel.send(`Created role, ${name}`);
+    const embed = new Discord.RichEmbed()
+    .setColor(0xfffff)
+    .addField(`Role`,
+    `Created Role, ${name}`)
+     message.channel.send({embed});
     console.log(`${message.author.username}, created a new role called -${name}-`);
   }
   if(command === "addRole") {
-  let ROLE = message.guild.roles.find("name", args.join(" "));
-  let dude = (message.mentions.users.first());
+  let ROLE = message.guild.roles.find("name", args.slice(1).join(" "));
+  let dude = (message.mentions.members.first());
   if(!message.member.roles.some(r=>["ADMIN", "SERVER OWNER", "BOTS"].includes(r.name)) ) {
         return message.reply("You dont have permission to use this command");
       }
@@ -540,12 +487,13 @@ const embed = new Discord.RichEmbed()
   if(message.member.roles.has(ROLE)) {
     return message.reply(`${dude} already has the role`)
   }
-  message.guild.member(dude).addRole(ROLE);
+      dude.addRole(ROLE);
   message.channel.send(`${message.author.username} gave ${dude} the ${ROLE} Role`)
-}
+};
+//REMOVE-ROLE
   if(command === "removeRole") {
-  let ROLE = message.guild.roles.find("name", args.join(" "));
-  let dude = (message.mentions.users.first());
+  let ROLE = message.guild.roles.find("name", args.slice(1).join(" "));
+  let dude = (message.mentions.members.first());
   if(!message.member.roles.some(r=>["ADMIN", "SERVER OWNER", "BOTS"].includes(r.name)) ) {
         return message.reply("You dont have permission to use this command");
       }
@@ -555,12 +503,12 @@ const embed = new Discord.RichEmbed()
     if(ROLE.length > 0) {
       return message.reply('Please add a role to remove')
     }
-  if(message.member.roles.has(ROLE.id)) {
+  if(!message.member.roles.has(ROLE.id)) {
     return message.reply(`${dude} doesnt have that role`)
   }
-  message.guild.member(dude).addRole(ROLE);
+      dude.removeRole(ROLE);
   message.channel.send(`${message.author.username} removed ${dude}s ${ROLE} Role`)
   }
 });
-  
-client.login('process.env.BOT_TOKEN')
+
+  client.login('process.env.BOT_TOKEN')
