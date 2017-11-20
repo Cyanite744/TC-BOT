@@ -4,8 +4,12 @@
   "description": "Amazing bot",
   "main": "TC-BOT.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node TC-BOT.js"
   },
+  "dependancies": {
+  "discord.js": "11.1.0",
+  "request":  "2.81.0"
+  }
   "author": "Cyanite",
   "license": "ISC"
 }
