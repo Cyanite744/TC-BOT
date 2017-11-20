@@ -511,4 +511,4 @@ const embed = new Discord.RichEmbed()
   }
 });
 
-  client.login('MzEyNTA2MDYwNjcxODExNTg2.C_cDiQ.dO8vvt2vsgPHxT-aQg3-QP1GnU8')
+  client.login('process.env.BOT_TOKEN')
