@@ -4,7 +4,7 @@
   "description": "Amazing bot",
   "main": "TC-BOT.js",
   "scripts": {
-    "start": "node TC-BOT.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Cyanite",
   "license": "ISC"
