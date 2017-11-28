@@ -1,11 +1,12 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const yt = require('ytdl-core');
-
+const search = require('youtube-search');
 //START-UP
 client.on('ready', () => {
     console.log('TC BOT is now online');
     client.user.setPresence({ game: { name: `${client.user.username}|.help`, type: 0 } });
+
 });
 
 const prefix = ".";
@@ -49,7 +50,7 @@ client.on('message', message => {
 //FAILURE
 client.on('message', message => {
     if(message.content.startsWith('.')){
-    let filter = ["help", "ping", "roast", "8ball", "say", "music", "play", "leave", "radio-list", "radio-1", "radio-2", "radio-3", "radio-4", "radio-5", "admin", "kick", "ban", "punish", "unpunish", "addRole", "removeRole", "tell"];
+    let filter = ["help", "ping", "roast", "8ball", "say", "music", "play", "leave", "admin", "kick", "ban", "punish", "unpunish", "addRole", "removeRole", "tell", "invite", "purge", "radio", "mod"];
     if(!filter.some(function(v) { 
         return message.content.indexOf(v) >= 0; 
     })) {
@@ -72,6 +73,7 @@ client.on('message', message =>{
   if (command === "help") {
         const embed = new Discord.RichEmbed()
   .setColor(0xfffff)
+  .setFooter(`Made by Cyanite#5749`)
   .addField(`Help`,
   'Hello there ' + message.author.username + ', here are my commands\n' +
   '.help = this command\n' +
@@ -79,9 +81,11 @@ client.on('message', message =>{
   '.roast = get roasted by TC bot\n' +
   '.8ball = ask the magic 8 ball yes or no questions\n' +
   '.say = make the bot say somthing\n'+
+  '.prof = shows a list of some info about your self\n' +
+  '.invite = invite me to your sever\n' +
   '.music = display music commands\n' +
-  '.admin = display list of admin commands __only for admins__\n' +
-  '.info-(loopy, cyanite, kyre, tearss, nature, frantic, jerry) = to get a disc of them')
+  '.mod = display list of admin commands __only for moderators__\n' +
+  '.admin = display list of admin commands __only for admins__')
    message.channel.send({embed});
   } 
 //SAY
@@ -136,55 +140,50 @@ client.on('message', message =>{
     var Roast = Math.floor(Math.random()*textArray.length);
     message.reply(`${textArray[Roast]}`)
   }
-//EVAL
-client.on('message', message => {
-  if(message.author.id !== "272154298077544449") return;
-  const prefix = ".";
-  const args = message.content.split(" ").slice(1);
-
-  if (message.content.startsWith(prefix + "eval")) {
-    try {
-      var code = args.join(" ");
-      var evaled = eval(code);
-
-      if (typeof evaled !== "string")
-        evaled = require("util").inspect(evaled);
-
-      message.channel.sendCode("xl", clean(evaled));
-    } catch (err) {
-      message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
-    }
+//ID
+  if (command === "prof") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0xfffff)
+    .setAuthor(`${message.author.username}s ID card`)
+    .setThumbnail(message.author.avatarURL)
+    .addField(`ID`,
+              `${message.author.id}`)
+    .addField(`Status`,
+              `${message.author.presence.status}`)
+    .addField(`Nickname`,
+              `${message.member.nickname}`)
+    .addField(`Game`,
+              `${message.author.presence.game.name}`)
+              let dude = (message.mentions.members.first());
+    message.channel.send(embed)
+  };
+//INVITE
+  if (command === "invite") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0xfffff)
+    .addField(`Invitation link`,
+              `Here you are ${message.author.username}, you are free to invite me to your server\n` +
+              `https://discordapp.com/oauth2/authorize?&client_id=312506060671811586&scope=bot&permissions=12659727`);
+    message.channel.send({embed});
   }
-});
-function clean(text) {
-  if (typeof(text) === "string")
-    return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
-  else
-    return text;
-};
 //MUSIC
   if (command === "music") {
         const embed = new Discord.RichEmbed()
   .setColor(0xfffff)
   .addField(`Music`,
-  '.play = automatically joins the voice channel that you are in and start playing music ex: .play (www.youtubelink.com)\n' +
+  '.play = Use a link or just simply search to play your favorite music\n' +
   '.leave = leaves the channel you are in\n' +
-  '.radio-list = displays a list of 24/7 music genres\n' +
-  '.radio-1-5 = choose out of 1-5 radios to play from')
+  '.radio = displays different genres of music that can be played')
    message.channel.send({embed});
   }
 //PLAY
  if (command === "play"){
     const voiceChannel = message.member.voiceChannel;
-        let filter2 = ["www."];
-    if(!filter2.some(function(v) { 
-        return message.content.indexOf(v) >= 0; 
-    })) { 
-        return message.reply('please add a link')
-    }
     if (!voiceChannel){
       return message.channel.send(":x: You are not in a voice channel!!");
     }
+    if(args[0].startsWith("http")){
+    voiceChannel.leave()
 	message.channel.send(":white_check_mark: **Connected!**");
     voiceChannel.join()
     .then(connection => {
@@ -192,107 +191,158 @@ function clean(text) {
       let stream = yt(args.join(" "), {audioonly: true});
       yt.getInfo(args.join(" "), function(err, info) {
       const title = info.title
-	  message.channel.send(`Now playing \`${title}\``)
+	  message.channel.send(`Now playing \__${title}\__`)
       })
       const dispatcher = connection.playStream(stream);
       dispatcher.on("end", end => {voiceChannel.leave()});
     });
+  } else {
+    var opts = {
+      maxResults: 1,
+      key: 'AIzaSyDcfmwCaQ1KGIU0qiHU8LCH22kdmOnMSAc'
+    };
+    const voiceChannel = message.member.voiceChannel;
+    let args = message.content.slice(6)
+    let name = args
+    console.log(name)
+    search(name, opts, (err, results) => {
+      if(err) return console.log(err);
+      voiceChannel.leave()
+      message.channel.send(":white_check_mark: **Connected!**")
+      message.channel.send(`Now playing: __${results[0].title}__`);
+      voiceChannel.join()
+       .then(connection => {
+         const stream = yt(`${results[0].link}`, { filter : 'audioonly' });
+              yt.getInfo(`${results[0].link}`, function(err, info) {
+            })
+         const dispatcher = connection.playStream(stream);
+         dispatcher.on("end", end => {voiceChannel.leave()});
+       })    
+    })
+  }
   };
-//RADIO-1
-  if (command === "radio-1") {
-    const voiceChannel = message.member.voiceChannel;
-    if (!voiceChannel){
-      return message.channel.send(":x: You must be in a voice channel first!");
-    }
-voiceChannel.join()
- .then(connection => {
-   const stream = yt('https://www.youtube.com/watch?v=IW8Okk5SsrE', { filter : 'audioonly' });
-        yt.getInfo('https://www.youtube.com/watch?v=IW8Okk5SsrE', function(err, info) {
-      message.channel.send(`Now playing: __***CHILL***__`)
-      })
-   const dispatcher = connection.playStream(stream);
- })
-  }
-//RADIO-2
-  if (command === "radio-2") {
-    const voiceChannel = message.member.voiceChannel;
-    if (!voiceChannel){
-      return message.channel.send(":x: You must be in a voice channel first!");
-    }
-voiceChannel.join()
- .then(connection => {
-   const stream = yt('https://www.youtube.com/watch?v=daRLyB9rVC4', { filter : 'audioonly' });
-        yt.getInfo('https://www.youtube.com/watch?v=daRLyB9rVC4', function(err, info) {
-      message.channel.send(`Now playing: __***TRAP***__`)
-      })
-   const dispatcher = connection.playStream(stream);
- })
-  }
-//RADIO-3
-    if (command === "radio-3") {
-    const voiceChannel = message.member.voiceChannel;
-    if (!voiceChannel){
-      return message.channel.send(":x: You must be in a voice channel first!");
-    }
-voiceChannel.join()
- .then(connection => {
-   const stream = yt('https://www.youtube.com/watch?v=fJYhEHGJ5N8', { filter : 'audioonly' });
-        yt.getInfo('https://www.youtube.com/watch?v=fJYhEHGJ5N8', function(err, info) {
-      message.channel.send(`Now playing: __***R&B***__`)
-      })
-   const dispatcher = connection.playStream(stream);
- })
-  }
-//RADIO-4
-    if (command === "radio-4") {
-    const voiceChannel = message.member.voiceChannel;
-    if (!voiceChannel){
-      return message.channel.send(":x: You must be in a voice channel first!");
-    }
-voiceChannel.join()
- .then(connection => {
-   const stream = yt('https://www.youtube.com/watch?v=Z_HAq7Dl1Ek', { filter : 'audioonly' });
-        yt.getInfo('https://www.youtube.com/watch?v=Z_HAq7Dl1Ek', function(err, info) {
-      message.channel.send(`Now playing: __***RAP***__`)
-      })
-   const dispatcher = connection.playStream(stream);
- })
-  }
-//RADIO-5
-    if (command === "radio-5") {
-    const voiceChannel = message.member.voiceChannel;
-    if (!voiceChannel){
-      return message.channel.send(":x: You must be in a voice channel first!");
-    }
-voiceChannel.join()
- .then(connection => {
-   const stream = yt('https://www.youtube.com/watch?v=CnFHPWbne2k', { filter : 'audioonly' });
-        yt.getInfo('https://www.youtube.com/watch?v=CnFHPWbne2k', function(err, info) {
-      message.channel.send(`Now playing: __***NIGHTCORE***__`)
-      })
-   const dispatcher = connection.playStream(stream);
- })
-  }
 //RADIO-LIST
-  if (command === "radio-list") {
-      const embed = new Discord.RichEmbed()
-  .setAuthor('Radio-List')
-  .setColor(0xfffff)
-  .setTimestamp()
-  .addField('.radio-1',
-    `Chill`)
-  .addField('.radio-2',
-    'Trap')
-  .addField('.radio-3',
-    'R&B')
-  .addField('.radio-4',
-    'Rap')
-  .addField('.radio-5',
-    'Nightcore')
-  .addField('Feedback',
-  'If you would like another genre or a radio isnt working please message __Cyanite#5749__')
-  message.channel.send({embed});
+if (command === `radio`) {
+  const voiceChannel = message.member.voiceChannel;
+  if (!voiceChannel){
+    return message.channel.send(":x: You must be in a voice channel first!");
   }
+const embed = new Discord.RichEmbed()
+.setColor(0xfffff)
+.addField('What kind of music would you like to listen to?',
+  `Chill   Trap   R&B   Rap  Nightcore`)
+.setFooter("Genres are CASE SENSITIVE!")
+      message.channel.send({embed})
+.then(() => {
+  message.channel.awaitMessages(response => response.content === 'Chill', {
+    max: 1,
+    time: 30000,
+    errors: ['time'],
+  })
+  .then((collected) => {
+  voiceChannel.leave()
+  message.channel.send(":white_check_mark: **Connected!**")
+  voiceChannel.join()
+   .then(connection => {
+     const stream = yt('https://www.youtube.com/watch?v=IW8Okk5SsrE', { filter : 'audioonly' });
+          yt.getInfo('https://www.youtube.com/watch?v=IW8Okk5SsrE', function(err, info) {
+        message.channel.send(`Now playing: __***CHILL***__`)
+        })
+     const dispatcher = connection.playStream(stream);
+     dispatcher.on("end", end => {voiceChannel.leave()});
+   })
+    
+    })
+    .catch(() => {
+      message.channel.send('You did not select a genre within the time limit!');
+    });
+
+});
+message.channel.awaitMessages(response => response.content === 'Trap', {
+  max: 1,
+  time: 30000,
+  errors: ['time'],
+})
+.then((collected) => {
+  voiceChannel.leave()
+  message.channel.send(":white_check_mark: **Connected!**")
+  voiceChannel.join()
+   .then(connection => {
+     const stream = yt('https://www.youtube.com/watch?v=daRLyB9rVC4', { filter : 'audioonly' });
+          yt.getInfo('https://www.youtube.com/watch?v=daRLyB9rVC4', function(err, info) {
+        message.channel.send(`Now playing: __***TRAP***__`)
+        })
+     const dispatcher = connection.playStream(stream);
+     dispatcher.on("end", end => {voiceChannel.leave()});
+   })
+   .catch(() => {
+    message.channel.send('You did not select a genre within the time limit!');
+  });
+})
+message.channel.awaitMessages(response => response.content === 'R&B', {
+  max: 1,
+  time: 30000,
+  errors: ['time'],
+})
+.then((collected) => {
+  voiceChannel.leave()
+  message.channel.send(":white_check_mark: **Connected!**")
+  voiceChannel.join()
+   .then(connection => {
+     const stream = yt('https://www.youtube.com/watch?v=fJYhEHGJ5N8', { filter : 'audioonly' });
+          yt.getInfo('https://www.youtube.com/watch?v=fJYhEHGJ5N8', function(err, info) {
+        message.channel.send(`Now playing: __***R&B***__`)
+        })
+     const dispatcher = connection.playStream(stream);
+     dispatcher.on("end", end => {voiceChannel.leave()});
+   })
+   .catch(() => {
+    message.channel.send('You did not select a genre within the time limit!');
+  });
+})
+message.channel.awaitMessages(response => response.content === 'Rap', {
+  max: 1,
+  time: 30000,
+  errors: ['time'],
+})
+.then((collected) => {
+  voiceChannel.leave()
+  message.channel.send(":white_check_mark: **Connected!**")
+  voiceChannel.join()
+   .then(connection => {
+     const stream = yt('https://www.youtube.com/watch?v=Z_HAq7Dl1Ek', { filter : 'audioonly' });
+          yt.getInfo('https://www.youtube.com/watch?v=Z_HAq7Dl1Ek', function(err, info) {
+        message.channel.send(`Now playing: __***Rap***__`)
+        })
+     const dispatcher = connection.playStream(stream);
+     dispatcher.on("end", end => {voiceChannel.leave()});
+   })
+   .catch(() => {
+    message.channel.send('You did not select a genre within the time limit!');
+  });
+})
+message.channel.awaitMessages(response => response.content === 'Nightcore', {
+  max: 1,
+  time: 30000,
+  errors: ['time'],
+})
+.then((collected) => {
+  voiceChannel.leave()
+  message.channel.send(":white_check_mark: **Connected!**")
+  voiceChannel.join()
+   .then(connection => {
+     const stream = yt('https://www.youtube.com/watch?v=CnFHPWbne2k', { filter : 'audioonly' });
+          yt.getInfo('https://www.youtube.com/watch?v=CnFHPWbne2k', function(err, info) {
+        message.channel.send(`Now playing: __***Nightcore***__`)
+        })
+     const dispatcher = connection.playStream(stream);
+     dispatcher.on("end", end => {voiceChannel.leave()});
+   })
+   .catch(() => {
+    message.channel.send('You did not select a genre within the time limit!');
+  });
+})
+};
 //LEAVE CHANNEL
   if (command === "leave") {
       const voiceChannel = message.member.voiceChannel;
@@ -315,18 +365,22 @@ voiceChannel.join()
             '.tell = tell someone somthing without having to find them in your DMs')
           message.author.send({embed});
   }
+//MOD
   if (command === "mod") {
   if(!message.member.roles.some(r=>["MODERATORS", "ADMIN", "SERVER OWNER"].includes(r.name)) ) {
       return message.reply("You dont have permission to use this command");
   }
-  if(!message.member.roles.some(r=>["ADMIN", "SERVER OWNER"].includes(r.name)) ) {
-  return message.reply("You have a higher role than a moderator, use `.admin` to get the full list of command you can use");
+  if(message.member.roles.some(r=>["ADMIN", "SERVER OWNER"].includes(r.name)) ) {
+  return message.reply("You have a higher role than a moderator, use `.admin` to get the full list of commands you can use");
 }
   const embed = new Discord.RichEmbed()
   .setColor(0xfffff)
   .addField(`MODERATOR Commands`,
             '.punish = punish a user\n' +
             '.unpunish = unpunish a user\n' +
+            '.addRole = create a new role\n' +
+            '.removeRole = delete a role\n' +
+            '.kick = kick a member\n' +
             '.announce = make an announcement\n')
           message.author.send({embed});
   }
@@ -342,6 +396,7 @@ voiceChannel.join()
   .setTimestamp()
   .addField(`New Announcement by ${message.author.username}`,
   `@everyone ${announcement}`)
+    message.delete();
     message.channel.send({embed})
    } 
 //TELL
@@ -353,7 +408,23 @@ voiceChannel.join()
       message.guild.member(Member).send(`__Message From Team Cryptic__: ${args.slice(1).join(" ")}`);
               message.delete();
 }
-
+//PURGE
+if (command === "purge") {
+const user = message.mentions.users.first();
+const amount = !!parseInt(message.content.split(' ')[1]) ? parseInt(message.content.split(' ')[1]) : parseInt(message.content.split(' ')[2])
+if (!amount) return message.reply('Must specify an amount to delete!');
+if (!amount && !user) return message.reply('Must specify a user and amount, or just an amount, of messages to purge!');
+message.delete();
+message.channel.fetchMessages({
+ limit: amount,
+}).then((messages) => {
+ if (user) {
+ const filterBy = user ? user.id : Client.user.id;
+ messages = messages.filter(m => m.author.id === filterBy).array().slice(0, amount);
+ }
+ message.channel.bulkDelete(messages).catch(error => console.log(error.stack));
+});
+};
 //PUNISH
   if (command === "punish") {
   if(!message.member.roles.some(r=>["ADMIN", "SERVER OWNER", "TRIAL MODERATORS", "MODERATORS"].includes(r.name)) ) {
@@ -405,11 +476,8 @@ const embed = new Discord.RichEmbed()
   if(!message.member.roles.some(r=>["ADMIN", "SERVER OWNER"].includes(r.name)) ) {
         return message.reply("You dont have permission to use this command");
       }
-    if(message.mentions.users.size === 0) {
+    if(message.mentions.members.size === 0) {
       return message.reply("Please mention a user to kick");
-    }
-    if(args.length > 0) {
-      return message.reply('Please add a reason')
     }
     let guild = member.guild;
     let kickMember = (message.mentions.users.first());
@@ -511,4 +579,4 @@ const embed = new Discord.RichEmbed()
   }
 });
 
-  client.login('process.env.BOT_TOKEN')
+client.login('process.env.BOT_TOKEN')
